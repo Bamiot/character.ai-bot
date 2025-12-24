@@ -13,8 +13,6 @@ const client = new Client({
   ],
 });
 
-let config;
-
 const config = require("./config.js");
 
 const fs = require("fs");
