@@ -1,7 +1,7 @@
 # Utiliser l'image Node.js officielle
 FROM node:20-slim
 
-# Installer les dépendances système nécessaires pour Puppeteer (utilisé par node_characterai)
+# Installer les dépendances système nécessaires pour Puppeteer et node-gyp
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -20,8 +20,12 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
+    python3 \
+    python3-pip \
+    build-essential \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python
 
 # Configurer les variables d'environnement pour Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
