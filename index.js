@@ -20,6 +20,11 @@ const fs = require("fs");
 const { CharacterAI } = require("node_characterai");
 const characterAI = new CharacterAI();
 
+// Cache for character and DM to avoid memory leaks from repeated listener registration
+let cachedCharacter = null;
+let cachedDM = null;
+let cachedCharacterId = null;
+
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord.js");
 
@@ -103,12 +108,16 @@ client.on("messageCreate", async (message) => {
 
   // If no token its not auth'd
   if (!characterAI?.token) await characterAI.authenticate(config.authToken); // Authenticate again if the auth has timed out
-  const character = await characterAI.fetchCharacter(client.activeCharacter); // Get character by charID
 
-  const dm = await character.DM(); // Get the main conversation of the character
+  // Use cached character/DM or fetch new ones if character changed
+  if (!cachedCharacter || cachedCharacterId !== client.activeCharacter) {
+    cachedCharacter = await characterAI.fetchCharacter(client.activeCharacter);
+    cachedDM = await cachedCharacter.DM();
+    cachedCharacterId = client.activeCharacter;
+  }
 
   // Adds [@Username]: infront of the message and sends it to the AI. (replace this with msgText if you don't want this)
-  const aiReponse = await dm.sendMessage(
+  const aiReponse = await cachedDM.sendMessage(
     `[@${message.author.username}]:` + msgText
   );
 
